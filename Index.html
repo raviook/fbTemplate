@@ -1,0 +1,26 @@
+@{
+    ViewBag.Title = "Home Page";
+}
+<style>
+    div#canvasTextDiv {
+        -ms-transform: rotate(-20deg); /* IE 9 */
+        -webkit-transform: rotate(-20deg); /* Safari prior 9.0 */
+        transform: rotate(-20deg); /* Standard syntax */
+        cursor: move;
+    }
+</style>
+<div class="row">
+    Mq Canvas Implementaion Demo
+</div>
+<div class="row">
+    <div class="myCanvasDiv">
+        <canvas id="canvas"></canvas>
+        <div id="canvasTextDiv">
+            <input type="text" id="canvasText" />
+        </div>
+        <div id="color" style="width:200px;height:50px;float:left"></div>
+    </div>
+
+    <button id="adText">Add Text</button>
+</div>
+<script src="~/Scripts/CanvasMq.js"></script>
