@@ -1,6 +1,6 @@
 var MqCanvas = {
     Vars: {
-        canvas:''
+        canvas: ''
     },
     Init: function () {
         MqCanvas.Vars.canvas = new fabric.Canvas('canvasMq');
@@ -12,8 +12,8 @@ var MqCanvas = {
             padding: 5
         });
         var baseUrl = window.location.origin;
-        MqCanvas.AddBackground(baseUrl+'/Content/scooter.jpg');
-        MqCanvas.AddLogo(baseUrl+'/Content/logot.jpg');
+        MqCanvas.AddBackground(baseUrl + '/Content/scooter.jpg');
+        MqCanvas.AddLogo(baseUrl + '/Content/logo.jpg');
         MqCanvas.AddText('Tap and Type');
     },
     Events: function () {
@@ -147,8 +147,9 @@ var MqCanvas = {
     },
     AddText: function (placeholder) {
         MqCanvas.Vars.canvas.add(new fabric.IText(placeholder, {
-            left: 50,
-            top: 100,
+            left: 250,
+            top: 40,
+            angle:10,
             fontFamily: 'verdana',
             fill: '#000',
             stroke: '#000',
@@ -158,18 +159,15 @@ var MqCanvas = {
     AddLogo: function (url) {
         fabric.Image.fromURL(url, function (img) {
             var oImg = img.set({
-                left: 0,
-                top: 0,
-                angle: 0,
-                //border: '#000',
-                stroke: '#F0F0F0',
-                strokeWidth: 40
-            }).scale(0.2);
+                left: 10,
+                top: 10,
+                angle: 0
+            }).scale(1);
             MqCanvas.Vars.canvas.add(oImg).renderAll();
-            var dataURL = MqCanvas.Vars.canvas.toDataURL({
-                format: 'png',
-                quality: 1
-            });
+            //var dataURL = MqCanvas.Vars.canvas.toDataURL({
+            //    format: 'png',
+            //    quality: 1
+            //});
         });
     },
     AddBackground: function (url) {
@@ -182,15 +180,15 @@ var MqCanvas = {
             });
         });
     },
-    DeleteActiveElement:function(){
+    DeleteActiveElement: function () {
         MqCanvas.Vars.canvas.remove(MqCanvas.Vars.canvas.getActiveObject());
     },
     ExportTemplate: function () {
         var dataUrl = MqCanvas.Vars.canvas.toDataURL({
             format: 'png',
             quality: 0.8
-       });
-       alert(dataUrl);
+        });
+        alert(dataUrl);
     }
 };
 $(document).ready(function () {
