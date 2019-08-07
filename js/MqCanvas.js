@@ -1,84 +1,199 @@
 var MqCanvas = {
     Vars: {
-        OriginalContext: '',
-        AlterContext: '',
-        CanvasElement: '',
-        CanvasTextDiv: '',
-        Pos1: 0,
-        Pos2: 0,
-        Pos3: 0,
-        Pos4: 0,
+        canvas:''
     },
     Init: function () {
-        this.Vars.CanvasElement = document.getElementById('canvas');
-        this.Vars.OriginalContext = canvas.getContext('2d');
-        this.Vars.AlterContext = canvas.getContext('2d');
-        this.InsertBackgroundImage();
-        this.Addtext();
-        this.InsertLogoImage();
-        $("#canvasTextDiv").mouseup(function () {
-            $('#canvasTextDiv').unbind('mousemove');
+        MqCanvas.Vars.canvas = new fabric.Canvas('canvasMq');
+        fabric.Object.prototype.set({
+            transparentCorners: true,
+            cornerColor: '#22A7F0',
+            borderColor: '#22A7F0',
+            cornerSize: 12,
+            padding: 5
         });
-        $("body").mouseup(function () {
-            $('#canvasTextDiv').unbind('mousemove');
+        var baseUrl = window.location.origin;
+        MqCanvas.AddBackground(baseUrl+'/Content/scooter.jpg');
+        MqCanvas.AddLogo(baseUrl+'/Content/logot.jpg');
+        MqCanvas.AddText('Tap and Type');
+    },
+    Events: function () {
+        // display/hide text controls
+        //MqCanvas.Vars.canvas.on('object:selected', function(e) {
+        //   if (e.target.type === 'i-text') {
+        //      document.getElementById('textControls').hidden = false;
+        //   }
+        //});
+        //MqCanvas.Vars.canvas.on('before:selection:cleared', function(e) {
+        //   if (e.target.type === 'i-text') {
+        //      document.getElementById('textControls').hidden = true;
+        //   }
+        //});
+        document.getElementById('canvasLogoImg').addEventListener("change", function (e) {
+            var file = e.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function (f) {
+                var data = f.target.result;
+                MqCanvas.AddLogo(data);
+            };
+            reader.readAsDataURL(file);
         });
-        $("#canvasTextDiv").mousedown(function () {
-            $('#canvasTextDiv').mousemove(function (event) {
-                MqCanvas.ElementDrag(event);
+        document.getElementById('canvasBackgroundImg').addEventListener("change", function (e) {
+            var file = e.target.files[0];
+            var reader = new FileReader();
+            reader.onload = function (f) {
+                var data = f.target.result;
+                MqCanvas.AddBackground(data);
+            };
+            reader.readAsDataURL(file);
+        });
+        $('#activeDeleteBtn').click(function () {
+            MqCanvas.DeleteActiveElement();
+        });
+        $('#addTextBtn').click(function () {
+            MqCanvas.AddText('Tap and Type');
+        });
+        $('#exportBtn').click(function () {
+            console.log($(this));
+            MqCanvas.ExportTemplate();
+        });
+        //download
+        var imageSaver = document.getElementById('lnkDownload');
+        imageSaver.addEventListener('click', saveImage, false);
+
+        function saveImage(e) {
+            console.log(e);
+            this.href = MqCanvas.Vars.canvas.toDataURL({
+                format: 'png',
+                quality: 0.8
+            });
+            this.download = 'custom.png'
+        }
+        //download
+        //TextEditor
+        document.getElementById('text-color').onchange = function () {
+            MqCanvas.Vars.canvas.getActiveObject().set('fill', this.value);
+            MqCanvas.Vars.canvas.renderAll();
+        };
+        document.getElementById('text-bg-color').onchange = function () {
+            MqCanvas.Vars.canvas.getActiveObject().set('textBackgroundColor', this.value);
+            MqCanvas.Vars.canvas.renderAll();
+        };
+        document.getElementById('text-stroke-color').onchange = function () {
+            MqCanvas.Vars.canvas.getActiveObject().set('stroke', this.value);
+            MqCanvas.Vars.canvas.renderAll();
+        };
+        document.getElementById('text-stroke-width').onchange = function () {
+            MqCanvas.Vars.canvas.getActiveObject().set('strokeWidth', this.value);
+            MqCanvas.Vars.canvas.renderAll();
+        };
+        document.getElementById('font-family').onchange = function () {
+            MqCanvas.Vars.canvas.getActiveObject().set('fontFamily', this.value);
+            MqCanvas.Vars.canvas.renderAll();
+        };
+        document.getElementById('text-font-size').onchange = function () {
+            MqCanvas.Vars.canvas.getActiveObject().set('fontSize', this.value);
+            MqCanvas.Vars.canvas.renderAll();
+        };
+        /*   needToWork  
+        document.getElementById('text-line-height').onchange = function () {
+            MqCanvas.Vars.canvas.getActiveObject().setLineHeight(this.value);
+            MqCanvas.Vars.canvas.renderAll();
+        };
+        document.getElementById('text-align').onchange = function () {
+            MqCanvas.Vars.canvas.getActiveObject().setTextAlign(this.value);
+            MqCanvas.Vars.canvas.renderAll();
+        };*/
+        radios5 = document.getElementsByName("fonttype");
+        for (var i = 0, max = radios5.length; i < max; i++) {
+            radios5[i].onclick = function () {
+
+                if (document.getElementById(this.id).checked == true) {
+                    if (this.id == "text-cmd-bold") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("fontWeight", "bold");
+                    }
+                    if (this.id == "text-cmd-italic") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("fontStyle", "italic");
+                    }
+                    if (this.id == "text-cmd-underline") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("underline", "underline");
+                    }
+                    if (this.id == "text-cmd-linethrough") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("linethrough", "line-through");
+                    }
+                    if (this.id == "text-cmd-overline") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("overline", "overline");
+                    }
+                } else {
+                    if (this.id == "text-cmd-bold") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("fontWeight", "");
+                    }
+                    if (this.id == "text-cmd-italic") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("fontStyle", "");
+                    }
+                    if (this.id == "text-cmd-underline") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("underline", "");
+                    }
+                    if (this.id == "text-cmd-linethrough") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("linethrough", "");
+                    }
+                    if (this.id == "text-cmd-overline") {
+                        MqCanvas.Vars.canvas.getActiveObject().set("overline", "");
+                    }
+                }
+                MqCanvas.Vars.canvas.renderAll();
+            }
+        }
+        //TextEditor
+    },
+    AddText: function (placeholder) {
+        MqCanvas.Vars.canvas.add(new fabric.IText(placeholder, {
+            left: 50,
+            top: 100,
+            fontFamily: 'verdana',
+            fill: '#000',
+            stroke: '#000',
+            fontSize: 45
+        }));
+    },
+    AddLogo: function (url) {
+        fabric.Image.fromURL(url, function (img) {
+            var oImg = img.set({
+                left: 0,
+                top: 0,
+                angle: 0,
+                //border: '#000',
+                stroke: '#F0F0F0',
+                strokeWidth: 40
+            }).scale(0.2);
+            MqCanvas.Vars.canvas.add(oImg).renderAll();
+            var dataURL = MqCanvas.Vars.canvas.toDataURL({
+                format: 'png',
+                quality: 1
             });
         });
-
-
-        //this.Vars.CanvasElement.addEventListener('mousemove', MqCanvas.pick);
     },
-    InsertBackgroundImage: function () {
-        var img = new Image();
-        img.onload = function () {
-            MqCanvas.Vars.AlterContext.drawImage(img, 0, 0);
-            MqCanvas.Addtext();
-        };
-        img.src = window.location.origin + '/Content/rhino.jpg';
+    AddBackground: function (url) {
+        fabric.Image.fromURL(url, function (img) {
+            MqCanvas.Vars.canvas.setBackgroundImage(img, MqCanvas.Vars.canvas.renderAll.bind(MqCanvas.Vars.canvas), {
+                scaleX: MqCanvas.Vars.canvas.width / img.width,
+                scaleY: MqCanvas.Vars.canvas.height / img.height,
+                backgroundImageOpacity: 0.5,
+                backgroundImageStretch: false
+            });
+        });
     },
-    InsertLogoImage: function () {
-        var img = new Image();
-        img.src = window.location.origin + '/Content/logo.jpg';
-        img.onload = function () {
-            MqCanvas.Vars.AlterContext.drawImage(img, 0, 0);
-        };
+    DeleteActiveElement:function(){
+        MqCanvas.Vars.canvas.remove(MqCanvas.Vars.canvas.getActiveObject());
     },
-    Addtext: function () {
-        MqCanvas.Vars.AlterContext.font = "40pt Calibri";
-        MqCanvas.Vars.AlterContext.fillText('Hello world1', 50, 50);
-    },
-    pick: function (event) {
-        var color = document.getElementById('color');
-        var x = event.layerX;
-        var y = event.layerY;
-        var pixel = MqCanvas.Vars.AlterContext.getImageData(x, y, 1, 1);
-        var data = pixel.data;
-        var rgba = 'rgba(' + data[0] + ', ' + data[1] +
-            ', ' + data[2] + ', ' + (data[3] / 255) + ')';
-        color.style.background = rgba;
-        color.textContent = rgba;
-    },
-    ElementDrag: function (e) {
-        e = e || window.event;
-        e.preventDefault();
-        // calculate the new cursor position:
-        MqCanvas.Vars.Pos1 = MqCanvas.Vars.Pos3 - e.clientX;
-        MqCanvas.Vars.Pos2 = MqCanvas.Vars.Pos4 - e.clientY;
-        MqCanvas.Vars.Pos3 = e.clientX;
-        MqCanvas.Vars.Pos4 = e.clientY;
-        // set the element's new position:
-        var offSetTop = MqCanvas.Vars.Pos2 + "px";
-        var offsetLeft = MqCanvas.Vars.Pos1 + "px";
-        console.log(offsetLeft);
-        //$("#canvasTextDiv").style.top = ($("#canvasTextDiv").offsetTop - MqCanvas.Vars.Pos2) + "px";
-        //$("#canvasTextDiv").style.left = ($("#canvasTextDiv").offsetLeft - MqCanvas.Vars.Pos1) + "px";
-        $("#canvasTextDiv").css("top", offSetTop);
-        $("#canvasTextDiv").css("left", offsetLeft);
-    },
+    ExportTemplate: function () {
+        var dataUrl = MqCanvas.Vars.canvas.toDataURL({
+            format: 'png',
+            quality: 0.8
+       });
+       alert(dataUrl);
+    }
 };
 $(document).ready(function () {
     MqCanvas.Init();
+    MqCanvas.Events();
 });
